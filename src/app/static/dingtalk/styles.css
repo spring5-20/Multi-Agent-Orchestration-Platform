@@ -1,0 +1,563 @@
+/* 钉协助手智能体页面样式：深色玻璃质感，沿用 /ui 天气页的视觉语言。 */
+
+:root {
+  --bg: #070b18;
+  --card: rgba(255, 255, 255, 0.055);
+  --card-strong: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #e9eefc;
+  --muted: #93a4c6;
+  --accent: #4f9cf9;
+  --accent-2: #7c6cff;
+  --warn: #ffb454;
+  --danger: #ff7585;
+  --ok: #46d19b;
+  --radius: 18px;
+  --shadow: 0 18px 40px rgba(3, 7, 20, 0.45);
+  --mono: "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 背景极光：两团缓慢移动的径向渐变，仅作氛围装饰 */
+.aurora {
+  position: fixed;
+  inset: -30% -10% auto -10%;
+  height: 120vh;
+  background:
+    radial-gradient(closest-side, rgba(79, 156, 249, 0.32), transparent 70%) 10% 16% / 55% 55% no-repeat,
+    radial-gradient(closest-side, rgba(124, 108, 255, 0.3), transparent 70%) 80% 6% / 60% 60% no-repeat,
+    radial-gradient(closest-side, rgba(70, 209, 155, 0.16), transparent 70%) 48% 42% / 70% 70% no-repeat;
+  filter: blur(10px);
+  animation: drift 26s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.08);
+  }
+}
+
+/* ---------------- 顶部栏与菜单 ---------------- */
+
+.topbar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 26px 20px 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(140deg, rgba(79, 156, 249, 0.35), rgba(124, 108, 255, 0.35));
+  border: 1px solid var(--border);
+  font-size: 24px;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.brand-text p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.menu a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.menu a:hover {
+  color: var(--text);
+  border-color: rgba(79, 156, 249, 0.6);
+  background: rgba(79, 156, 249, 0.14);
+}
+
+.menu a.active {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 20px rgba(79, 156, 249, 0.28);
+}
+
+/* ---------------- 运行环境状态 ---------------- */
+
+.status-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 20px 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.chip.ok {
+  color: var(--ok);
+}
+
+.chip.warn {
+  color: var(--warn);
+}
+
+.chip.bad {
+  color: var(--danger);
+}
+
+.chip .chip-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.status-bar .spacer {
+  flex: 1;
+}
+
+/* ---------------- 布局与卡片 ---------------- */
+
+.page-head {
+  position: relative;
+  z-index: 1;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 10px 20px 4px;
+}
+
+.page-head h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.page-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.notice {
+  position: relative;
+  z-index: 1;
+  max-width: 1360px;
+  margin: 8px auto 0;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 180, 84, 0.35);
+  border-radius: 14px;
+  background: rgba(255, 180, 84, 0.09);
+  color: #ffd9a6;
+  font-size: 13px;
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 18px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 18px 20px 40px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+}
+
+.card.full {
+  grid-column: 1 / -1;
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-head h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.card-head .card-hint {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.card-desc {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ---------------- 表单控件 ---------------- */
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.field.wide {
+  grid-column: 1 / -1;
+}
+
+.field input[type="text"],
+.field input[type="search"],
+.field input[type="datetime-local"],
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field textarea {
+  min-height: 92px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.field textarea.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: rgba(79, 156, 249, 0.7);
+  box-shadow: 0 0 0 3px rgba(79, 156, 249, 0.16);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(147, 164, 198, 0.68);
+}
+
+.field select option {
+  background: #101728;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.switch.confirm {
+  padding: 7px 12px;
+  border: 1px dashed rgba(255, 180, 84, 0.45);
+  border-radius: 10px;
+  background: rgba(255, 180, 84, 0.07);
+  color: #ffd9a6;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.actions .flex-spacer {
+  flex: 1;
+}
+
+button {
+  font-family: inherit;
+}
+
+.primary-btn {
+  padding: 9px 22px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.ghost-btn {
+  padding: 5px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ghost-btn:hover {
+  color: var(--text);
+  border-color: rgba(79, 156, 249, 0.6);
+  background: rgba(79, 156, 249, 0.14);
+}
+
+/* ---------------- 结果输出 ---------------- */
+
+.result {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(4, 8, 20, 0.55);
+  overflow: hidden;
+}
+
+.result[hidden] {
+  display: none;
+}
+
+.result-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+}
+
+.result-state {
+  font-weight: 600;
+}
+
+.result-state.ok {
+  color: var(--ok);
+}
+
+.result-state.preview {
+  color: var(--warn);
+}
+
+.result-state.bad {
+  color: var(--danger);
+}
+
+.result-time {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.result-head .flex-spacer {
+  flex: 1;
+}
+
+.result-body {
+  max-height: 320px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  color: #d7e2f7;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.result-pending {
+  padding: 14px 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.result-pending::after {
+  content: "▋";
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* ---------------- 其他 ---------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 9;
+  max-width: min(560px, 88vw);
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(20, 26, 44, 0.96);
+  color: var(--text);
+  font-size: 13px;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+.toast.error {
+  border-color: rgba(255, 117, 133, 0.6);
+  color: var(--danger);
+}
+
+.toast.ok {
+  border-color: rgba(70, 209, 155, 0.55);
+  color: var(--ok);
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    padding: 18px 14px 10px;
+  }
+
+  .menu {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .menu a {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .status-bar,
+  .page-head,
+  .notice {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px 14px 30px;
+  }
+}

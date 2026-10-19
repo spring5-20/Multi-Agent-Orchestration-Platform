@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>电商导购智能体 · 记忆测试台</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>"
+    />
+    <link rel="stylesheet" href="./styles.css?v=2" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">🛒</span>
+        <div class="brand-text">
+          <h1>电商导购智能体</h1>
+          <p>LangGraph 工作流 · 短期记忆 + 长期记忆 + 商品检索工具</p>
+        </div>
+      </div>
+
+      <nav class="menu" aria-label="页面切换">
+        <a href="/ui/">🌤️ 旅游建议</a>
+        <a href="/dingtalk/">📇 钉协助手</a>
+        <a href="./index.html" class="active" aria-current="page">🛒 电商导购</a>
+        <a href="./voice.html">🎙️ 语音对话</a>
+        <a href="/agents/">🧠 多智能体</a>
+        <a href="/bi/">📊 智能问数</a>
+      </nav>
+    </header>
+
+    <div class="status-bar">
+      <span class="chip" data-chip="api">
+        <span>后端接口</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="chip" data-chip="auth">
+        <span>登录状态</span>
+        <span class="chip-value" data-value>未登录</span>
+      </span>
+      <span class="chip" data-chip="conv">
+        <span>会话</span>
+        <span class="chip-value" data-value>—</span>
+      </span>
+      <span class="spacer"></span>
+      <button type="button" class="ghost-btn" data-new-conversation>新会话</button>
+      <button type="button" class="ghost-btn" data-refresh-status>刷新状态</button>
+    </div>
+
+    <div class="page-head">
+      <h2>带记忆的对话测试台</h2>
+      <p>
+        左侧先登录拿令牌，右侧直接提问。同一会话内的多轮对话走短期记忆（Checkpointer）；换一个新会话后仍然记得你的偏好，说明长期记忆（MemoryStore）生效。
+      </p>
+    </div>
+
+    <main class="layout">
+      <section class="card login-card">
+        <header class="card-head">
+          <h3>🔐 登录 / 注册</h3>
+          <span class="card-hint">POST /api/v1/auth/login</span>
+        </header>
+        <p class="card-desc">
+          对话接口需要 Bearer 令牌。点一次「登录 / 注册并登录」即可：账号不存在时会自动注册再登录，账号已存在时用你填的密码登录。令牌保存在浏览器 localStorage，仅用于本地调试。
+        </p>
+        <form id="loginForm" class="fields" autocomplete="off">
+          <label class="field">
+            用户名
+            <input type="text" id="username" name="username" value="tester" minlength="3" maxlength="100" required />
+          </label>
+          <label class="field">
+            密码
+            <input type="password" id="password" name="password" value="test123456" minlength="6" maxlength="128" required />
+          </label>
+          <div class="actions">
+            <button type="submit" class="primary-btn" data-login>登录 / 注册并登录</button>
+            <button type="button" class="ghost-btn" data-logout>退出登录</button>
+          </div>
+          <div class="login-result" id="loginResult" hidden></div>
+        </form>
+        <div class="memory-tips">
+          <span class="tip-title">记忆测试建议</span>
+          <ol>
+            <li>先在同一会话里说：「我预算 500 以内，想买双跑步鞋」。</li>
+            <li>再补一句：「我平时穿 42 码，喜欢轻便透气的」。</li>
+            <li>点「新会话」后只问「帮我再推荐几款」——如果还能按预算和尺码推荐，说明长期记忆被召回。</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="card chat-card">
+        <header class="card-head">
+          <h3>💬 对话（流式 SSE）</h3>
+          <span class="card-hint" id="chatHint">POST /api/v1/ecommerce/chat/stream</span>
+        </header>
+
+        <div class="chat-log" id="chatLog" aria-live="polite">
+          <div class="empty-state">登录后在这里提问，例如「预算 500 以内的跑鞋推荐」。</div>
+        </div>
+
+        <div class="suggestions" id="suggestions">
+          <button type="button">我预算 500 以内，想买双跑步鞋</button>
+          <button type="button">我平时穿 42 码，喜欢轻便透气的</button>
+          <button type="button">帮我再推荐几款</button>
+          <button type="button">谢谢，先看看</button>
+        </div>
+
+        <form class="chat-form" id="chatForm">
+          <textarea
+            id="chatInput"
+            rows="1"
+            placeholder="例如：我预算 500 以内，想买双跑步鞋（Enter 发送，Shift+Enter 换行）"
+            aria-label="向智能体提问"
+          ></textarea>
+          <button type="submit" class="primary-btn" id="chatSend">发送</button>
+          <button type="button" class="ghost-btn" id="chatStop" hidden>停止</button>
+        </form>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="./app.js?v=2" defer></script>
+  </body>
+</html>

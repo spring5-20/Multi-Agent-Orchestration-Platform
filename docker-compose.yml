@@ -1,0 +1,156 @@
+# ==============================================================================
+# 天气智能体 —— 生产环境编排（配合同目录 Dockerfile 使用）
+#
+# 用法：
+#   docker compose up -d --build     # 构建镜像并后台启动
+#   docker compose ps                # 查看各服务状态
+#   docker compose logs -f web       # 跟踪 web 日志
+#   docker compose down              # 停止并删除容器（命名卷里的数据会保留）
+#
+# 上线前必须先准备好 src/.env（它不在 git 里，需要单独上传），至少改这几项：
+#   POSTGRES_SERVER=db        REDIS_CACHE_HOST=redis
+#   REDIS_QUEUE_HOST=redis    REDIS_RATE_LIMIT_HOST=redis
+#   DOCUMENT_DIR=/app/storage/documents（本地那份是 Windows 路径 G:/Rag知识库，必须改）
+#   SECRET_KEY、POSTGRES_PASSWORD 换成强随机值
+#   ENVIRONMENT=production（注意：改成 production 会同时关闭 /docs、/redoc、/openapi.json）
+#
+# 常用的一次性命令：
+#   docker compose run --rm web alembic upgrade head                    # 执行数据库迁移
+#   docker compose run --rm web python -m src.scripts.create_first_superuser
+#
+# 说明：Milvus 没有包含在本文件里。需要 RAG 时单独部署 Milvus（etcd + minio + milvus 一整套），
+#       再把 .env 里的 ENABLE_MILVUS 打开、MILVUS_HOST 指向它的地址。
+# ==============================================================================
+
+services:
+  # ------------------------------ FastAPI 主服务 ------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: weather-agent:latest
+    env_file:
+      - ./src/.env
+    environment:
+      # 覆盖镜像里的默认值，按服务器核数调整（2 核就给 2）
+      WEB_CONCURRENCY: 2
+      PORT: 8000
+    # 只在内网提供，由 nginx 反向代理；不要写成 ports，否则会直接对公网暴露
+    expose:
+      - "8000"
+    volumes:
+      - app-storage:/app/storage
+      # 想让容器直接读取宿主机上的文档/知识库目录时，用下面这行替换上面那行，
+      # 同时把 .env 里的 DOCUMENT_DIR 指向 /app/storage/documents
+      # - /data/rag-documents:/app/storage/documents:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    # SSE 流式接口（/api/v1/qweather/chat）需要时间优雅收尾，别用默认的 10 秒
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ------------------------------ ARQ 后台任务进程 ------------------------------
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: weather-agent:latest
+    command: ["arq", "src.app.core.worker.settings.WorkerSettings"]
+    env_file:
+      - ./src/.env
+    volumes:
+      - app-storage:/app/storage
+    # 当前 worker 只连 Redis（任务函数和 on_startup 都不碰数据库）
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ------------------------------ PostgreSQL ------------------------------
+  db:
+    # 用带 pgvector 扩展的官方派生镜像：项目依赖里有 pgvector，以后加向量列不用换镜像
+    image: pgvector/pgvector:pg16
+    env_file:
+      - ./src/.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # 只在内网提供，不对公网开放端口
+    expose:
+      - "5432"
+    # 需要临时排查数据库时，打开下面这行（只绑定本机回环地址，再通过 SSH 隧道访问）
+    # ports:
+    #   - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ------------------------------ Redis（缓存 / 队列 / 限流） ------------------------------
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis-data:/data
+    expose:
+      - "6379"
+    # 需要临时排查 Redis 时，打开下面这行（同样只绑定本机回环地址）
+    # ports:
+    #   - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ------------------------------ nginx 反向代理 ------------------------------
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      # 配好 HTTPS 之后再打开：需要先在 default.conf 里加 443 的 server 块并挂载证书
+      # - "443:443"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      # 证书目录，配 HTTPS 时打开
+      # - /etc/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      web:
+        # 依赖镜像里的 HEALTHCHECK，web 健康检查通过后 nginx 才启动
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres-data:
+  redis-data:
+  # 上传文件与文档目录，web 和 worker 共用
+  app-storage:

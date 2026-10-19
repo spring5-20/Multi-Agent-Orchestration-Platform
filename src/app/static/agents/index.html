@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>多智能体编排控制台 · 单入口对话</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
+    />
+    <link rel="stylesheet" href="./styles.css?v=1" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">🧠</span>
+        <div class="brand-text">
+          <h1>多智能体编排控制台</h1>
+          <p>Supervisor 自动路由 · 天气 / 钉钉 / 电商子智能体 · 写操作确认闭环</p>
+        </div>
+      </div>
+
+      <nav class="menu" aria-label="页面切换">
+        <a href="/ui/">🌤️ 旅游建议</a>
+        <a href="/dingtalk/">📇 钉协助手</a>
+        <a href="/ecommerce/">🛒 电商导购</a>
+        <a href="/ecommerce/voice.html">🎙️ 语音对话</a>
+        <a href="./index.html" class="active" aria-current="page">🧠 多智能体</a>
+        <a href="/bi/">📊 智能问数</a>
+      </nav>
+    </header>
+
+    <div class="status-bar">
+      <span class="chip" data-chip="api">
+        <span>后端接口</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="chip" data-chip="agents">
+        <span>子智能体</span>
+        <span class="chip-value" data-value>—</span>
+      </span>
+      <span class="chip" data-chip="conv">
+        <span>会话</span>
+        <span class="chip-value" data-value>—</span>
+      </span>
+      <span class="chip" data-chip="user">
+        <span>user_id</span>
+        <span class="chip-value" data-value>0</span>
+      </span>
+      <span class="chip" data-chip="turn">
+        <span>本轮耗时</span>
+        <span class="chip-value" data-value>—</span>
+      </span>
+      <span class="spacer"></span>
+      <button type="button" class="ghost-btn" data-new-conversation>新会话</button>
+      <button type="button" class="ghost-btn" data-refresh-status>刷新状态</button>
+    </div>
+
+    <div class="page-head">
+      <h2>单入口对话（自动路由到子智能体）</h2>
+      <p>
+        直接说需求即可：天气类派给「和风天气」，办公操作派给「钉协助手」，选品购物派给「电商导购」。
+        写类操作（发消息 / 建日程 / 指派待办）会先弹确认卡，点「确认执行」才真正下达；右侧可以看到本轮派单轨迹。
+      </p>
+    </div>
+
+    <main class="layout">
+      <section class="card chat-card">
+        <header class="card-head">
+          <h3>💬 对话（流式 SSE）</h3>
+          <span class="card-hint" id="chatHint">POST /api/v1/orchestrator/chat</span>
+        </header>
+
+        <div class="chat-log" id="chatLog" aria-live="polite">
+          <div class="empty-state">
+            先试一句：「北京今天适合跑步吗？」或「给张三发条消息说会议改到三点」（后者会走确认闭环）。
+          </div>
+        </div>
+
+        <div class="suggestions" id="suggestions">
+          <button type="button" data-suggest="北京今天适合跑步吗？">北京今天适合跑步吗？</button>
+          <button type="button" data-suggest="杭州未来三天天气怎么样？">杭州未来三天天气</button>
+          <button type="button" data-suggest="推荐 500 元以内的跑鞋">推荐 500 元以内的跑鞋</button>
+          <button type="button" data-suggest="给张三发条消息：会议改到下午三点">给张三发消息（需确认）</button>
+        </div>
+
+        <form class="chat-form" id="chatForm">
+          <textarea
+            id="chatInput"
+            rows="1"
+            placeholder="例如：给张三发条消息说会议改到三点（Enter 发送，Shift+Enter 换行）"
+            aria-label="向编排器提问"
+          ></textarea>
+          <button type="submit" class="primary-btn" id="chatSend">发送</button>
+          <button type="button" class="ghost-btn" id="chatStop" hidden>停止</button>
+        </form>
+      </section>
+
+      <aside class="sidebar">
+        <section class="card">
+          <header class="card-head">
+            <h3>🤖 子智能体</h3>
+            <span class="card-hint">GET /api/v1/orchestrator/agents</span>
+          </header>
+          <div class="agent-list" id="agentList">
+            <div class="empty-state">正在读取子智能体清单…</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <header class="card-head">
+            <h3>🧭 本轮事件</h3>
+            <span class="card-hint">agent_call / agent_result / 确认</span>
+          </header>
+
+          <label class="field session-field">
+            user_id（电商长期记忆按它隔离）
+            <input type="number" id="userIdInput" min="0" step="1" value="0" inputmode="numeric" />
+          </label>
+
+          <ol class="timeline" id="timeline">
+            <li class="timeline-empty">还没有事件，先发一句话试试。</li>
+          </ol>
+        </section>
+
+        <section class="card">
+          <header class="card-head">
+            <h3>📈 运行指标</h3>
+            <span class="card-hint">GET /api/v1/observability/metrics</span>
+          </header>
+          <div class="metric-grid" id="metricGrid">
+            <div class="empty-state">正在读取指标…</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <header class="card-head">
+            <h3>🧪 质量评估</h3>
+            <span class="card-hint">POST /api/v1/agent/evaluation/batch</span>
+          </header>
+          <div class="eval-actions">
+            <button type="button" class="ghost-btn" data-eval="rules">跑规则指标</button>
+            <button type="button" class="primary-btn" data-eval="judge">含 LLM 判官</button>
+          </div>
+          <div class="eval-result" id="evalResult">
+            <div class="empty-state">用内置黄金集跑一遍：完成率 / 工具调用准确率 / 冲突率 / 延迟 / 成本。</div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="./app.js?v=1" defer></script>
+  </body>
+</html>

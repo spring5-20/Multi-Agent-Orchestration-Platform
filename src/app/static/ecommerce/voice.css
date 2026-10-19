@@ -1,0 +1,153 @@
+/* 实时语音对话页样式：沿用测试台的深色玻璃质感，补充麦克风控件。 */
+
+.voice-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.voice-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.mic-stage {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 4px 0 2px;
+}
+
+.mic-btn {
+  flex: 0 0 auto;
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: radial-gradient(circle at 32% 26%, rgba(79, 156, 249, 0.5), rgba(124, 108, 255, 0.26));
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1.1;
+  box-shadow: 0 12px 28px rgba(3, 7, 20, 0.45);
+  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
+  touch-action: none;
+}
+
+.mic-btn .mic-label {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.mic-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.mic-btn.listening {
+  background: radial-gradient(circle at 32% 26%, rgba(255, 117, 133, 0.55), rgba(124, 108, 255, 0.24));
+  animation: mic-pulse 1.4s ease-in-out infinite;
+}
+
+.mic-btn.thinking {
+  background: radial-gradient(circle at 32% 26%, rgba(70, 209, 155, 0.5), rgba(79, 156, 249, 0.24));
+}
+
+.mic-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes mic-pulse {
+  50% {
+    box-shadow: 0 0 0 16px rgba(255, 117, 133, 0.07), 0 12px 28px rgba(3, 7, 20, 0.5);
+  }
+}
+
+.mic-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.mic-meta p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.meter {
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(4, 8, 20, 0.6);
+  overflow: hidden;
+}
+
+.meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.08s linear;
+}
+
+.mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.mode-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-row input[type="range"] {
+  width: 130px;
+  accent-color: var(--accent);
+}
+
+.voice-tip {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  background: rgba(79, 156, 249, 0.07);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.voice-tip b {
+  color: var(--text);
+}
+
+.msg.system .bubble {
+  background: rgba(4, 8, 20, 0.5);
+  border-style: dashed;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.msg.assistant .bubble.audio-mark::after {
+  content: "🔈";
+  margin-left: 6px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+@media (max-width: 560px) {
+  .mic-stage {
+    flex-direction: column;
+    text-align: center;
+  }
+}

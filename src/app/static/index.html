@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>旅游建议智能体 · 和风天气</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">🌤️</span>
+        <div class="brand-text">
+          <h1>旅游建议智能体</h1>
+          <p>和风天气实时数据 · DeepSeek 出行建议</p>
+        </div>
+      </div>
+
+      <form class="search" id="searchForm" autocomplete="off">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input
+          id="cityInput"
+          type="search"
+          placeholder="输入城市名，如「杭州」；也可填经纬度 30.25,120.21"
+          aria-label="城市名或经纬度"
+        />
+        <button type="submit" id="searchButton">查询</button>
+      </form>
+
+      <div class="quick-cities" id="quickCities">
+        <button type="button" data-city="北京">北京</button>
+        <button type="button" data-city="上海">上海</button>
+        <button type="button" data-city="杭州">杭州</button>
+        <button type="button" data-city="成都">成都</button>
+        <button type="button" data-city="三亚">三亚</button>
+        <button type="button" data-city="哈尔滨">哈尔滨</button>
+      </div>
+    </header>
+
+    <nav class="menu" aria-label="页面切换">
+      <a href="./index.html" class="active" aria-current="page">🌤️ 旅游建议</a>
+      <a href="/dingtalk/">📇 钉协助手</a>
+      <a href="/ecommerce/">🛒 电商导购</a>
+      <a href="/ecommerce/voice.html">🎙️ 语音对话</a>
+      <a href="/agents/">🧠 多智能体</a>
+      <a href="/bi/">📊 智能问数</a>
+    </nav>
+
+    <main class="layout">
+      <div class="column">
+        <section class="card" id="currentCard">
+          <header class="card-head">
+            <h2>实时天气</h2>
+            <span class="card-hint" id="currentHint">尚未查询</span>
+          </header>
+          <div class="current-body" id="currentBody" aria-live="polite">
+            <div class="empty-state">输入城市后点击「查询」，即可查看实时天气与出行建议。</div>
+          </div>
+        </section>
+
+        <section class="card" id="adviceCard">
+          <header class="card-head">
+            <h2>AI 出行建议</h2>
+            <span class="card-hint">基于当前实时天气自动生成</span>
+          </header>
+          <div class="richtext" id="adviceBody" aria-live="polite">
+            <div class="empty-state">查询城市后，这里会给出穿衣、带伞、防晒、户外活动等提醒。</div>
+          </div>
+        </section>
+
+        <section class="card" id="forecastCard">
+          <header class="card-head">
+            <h2>未来 10 天预报</h2>
+            <span class="card-hint">点击任意一天，可直接向智能体提问</span>
+          </header>
+          <div class="forecast-track" id="forecastTrack" aria-live="polite">
+            <div class="empty-state">查询城市后展示逐日预报。</div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="card chat-card">
+        <header class="card-head">
+          <h2>💬 问问智能体</h2>
+          <span class="chat-status" id="chatStatus">在线</span>
+        </header>
+
+        <div class="chat-log" id="chatLog" aria-live="polite"></div>
+
+        <div class="chat-suggestions" id="chatSuggestions">
+          <button type="button">今天适合户外活动吗？</button>
+          <button type="button">未来三天哪几天最适合出游？</button>
+          <button type="button">明天需要带伞吗？</button>
+        </div>
+
+        <form class="chat-form" id="chatForm">
+          <textarea
+            id="chatInput"
+            rows="1"
+            placeholder="例如：周末去西湖适合骑行吗？"
+            aria-label="向智能体提问"
+          ></textarea>
+          <button type="submit" id="chatSend">发送</button>
+        </form>
+      </aside>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

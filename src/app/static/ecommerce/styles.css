@@ -1,0 +1,513 @@
+/* 电商导购智能体测试台样式：延续项目深色玻璃质感。 */
+
+:root {
+  --bg: #070b18;
+  --card: rgba(255, 255, 255, 0.055);
+  --card-strong: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #e9eefc;
+  --muted: #93a4c6;
+  --accent: #4f9cf9;
+  --accent-2: #7c6cff;
+  --warn: #ffb454;
+  --danger: #ff7585;
+  --ok: #46d19b;
+  --radius: 18px;
+  --shadow: 0 18px 40px rgba(3, 7, 20, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.aurora {
+  position: fixed;
+  inset: -30% -10% auto -10%;
+  height: 120vh;
+  background:
+    radial-gradient(closest-side, rgba(79, 156, 249, 0.32), transparent 70%) 12% 18% / 55% 55% no-repeat,
+    radial-gradient(closest-side, rgba(124, 108, 255, 0.3), transparent 70%) 78% 8% / 60% 60% no-repeat,
+    radial-gradient(closest-side, rgba(70, 209, 155, 0.16), transparent 70%) 45% 45% / 70% 70% no-repeat;
+  filter: blur(10px);
+  animation: drift 26s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.08);
+  }
+}
+
+/* ---------------- 顶部 ---------------- */
+
+.topbar,
+.status-bar,
+.page-head,
+.layout {
+  position: relative;
+  z-index: 1;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding-inline: 20px;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding-top: 26px;
+  padding-bottom: 14px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(140deg, rgba(79, 156, 249, 0.35), rgba(124, 108, 255, 0.35));
+  border: 1px solid var(--border);
+  font-size: 24px;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.brand-text p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.menu {
+  display: flex;
+  gap: 8px;
+}
+
+.menu a {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.menu a.active,
+.menu a:hover {
+  color: var(--text);
+  border-color: rgba(79, 156, 249, 0.6);
+  background: rgba(79, 156, 249, 0.16);
+}
+
+/* ---------------- 状态条 ---------------- */
+
+.status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.chip-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.chip.ok .chip-value {
+  color: var(--ok);
+}
+
+.chip.warn .chip-value {
+  color: var(--warn);
+}
+
+.chip.bad .chip-value {
+  color: var(--danger);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.page-head {
+  padding-top: 10px;
+  padding-bottom: 4px;
+}
+
+.page-head h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.page-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------------- 布局与卡片 ---------------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding-top: 12px;
+  padding-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  padding: 16px 18px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.card-head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.card-hint {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.card-desc {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ---------------- 表单 ---------------- */
+
+.fields {
+  display: grid;
+  gap: 10px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.field input,
+.chat-form textarea {
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(4, 8, 20, 0.55);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.field input:focus,
+.chat-form textarea:focus {
+  outline: none;
+  border-color: rgba(79, 156, 249, 0.7);
+  box-shadow: 0 0 0 3px rgba(79, 156, 249, 0.16);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.primary-btn,
+.ghost-btn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-weight: 600;
+}
+
+.primary-btn:disabled,
+.ghost-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ghost-btn {
+  background: var(--card-strong);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.ghost-btn:hover:not(:disabled) {
+  color: var(--text);
+}
+
+/* ---------------- 登录结果 ---------------- */
+
+.login-result {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(4, 8, 20, 0.5);
+  font-size: 12px;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.login-result.ok {
+  border-color: rgba(70, 209, 155, 0.5);
+  color: #c8ffe9;
+}
+
+.login-result.bad {
+  border-color: rgba(255, 117, 133, 0.5);
+  color: #ffd8de;
+}
+
+/* ---------------- 记忆提示 ---------------- */
+
+.memory-tips {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  background: rgba(79, 156, 249, 0.07);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.memory-tips .tip-title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.memory-tips ol {
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* ---------------- 对话 ---------------- */
+
+.chat-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+}
+
+.chat-log {
+  flex: 1 1 auto;
+  min-height: 300px;
+  max-height: 56vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 6px 2px;
+}
+
+.empty-state {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  text-align: center;
+}
+
+.msg {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 92%;
+}
+
+.msg .avatar {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+}
+
+.msg .bubble {
+  padding: 9px 13px;
+  border-radius: 14px;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.msg.user .bubble {
+  background: linear-gradient(135deg, rgba(79, 156, 249, 0.85), rgba(124, 108, 255, 0.85));
+  border-color: transparent;
+  color: #fff;
+}
+
+.msg.error .bubble {
+  border-color: rgba(255, 117, 133, 0.6);
+  background: rgba(255, 117, 133, 0.12);
+  color: #ffd8de;
+}
+
+.msg .meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.typing::after {
+  content: "▌";
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.suggestions button {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.suggestions button:hover {
+  color: var(--text);
+  border-color: rgba(79, 156, 249, 0.6);
+}
+
+.chat-form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.chat-form textarea {
+  flex: 1 1 auto;
+  resize: vertical;
+  min-height: 42px;
+  max-height: 160px;
+}
+
+/* ---------------- 提示条 ---------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 9;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(10, 16, 32, 0.92);
+  color: var(--text);
+  font-size: 13px;
+  box-shadow: var(--shadow);
+}
+
+.toast.error {
+  border-color: rgba(255, 117, 133, 0.6);
+  color: #ffd8de;
+}
+
+.toast.ok {
+  border-color: rgba(70, 209, 155, 0.6);
+  color: #c8ffe9;
+}

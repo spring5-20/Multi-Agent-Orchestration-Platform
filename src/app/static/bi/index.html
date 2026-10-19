@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>智能问数 · Text-to-SQL</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>"
+    />
+    <link rel="stylesheet" href="./styles.css?v=1" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">📊</span>
+        <div class="brand-text">
+          <h1>智能问数</h1>
+          <p>自然语言 → SQL → 只读执行 → 结论 · 表结构运行时内省 · 全程留痕</p>
+        </div>
+      </div>
+
+      <nav class="menu" aria-label="页面切换">
+        <a href="/ui/">🌤️ 旅游建议</a>
+        <a href="/dingtalk/">📇 钉协助手</a>
+        <a href="/ecommerce/">🛒 电商导购</a>
+        <a href="/ecommerce/voice.html">🎙️ 语音对话</a>
+        <a href="/agents/">🧠 多智能体</a>
+        <a href="./index.html" class="active" aria-current="page">📊 智能问数</a>
+      </nav>
+    </header>
+
+    <div class="status-bar">
+      <span class="chip" data-chip="api">
+        <span>后端接口</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="chip" data-chip="tables">
+        <span>可问数表</span>
+        <span class="chip-value" data-value>—</span>
+      </span>
+      <span class="chip" data-chip="conv">
+        <span>会话</span>
+        <span class="chip-value" data-value>—</span>
+      </span>
+      <span class="chip" data-chip="user">
+        <span>user_id</span>
+        <span class="chip-value" data-value>0</span>
+      </span>
+      <span class="spacer"></span>
+      <button type="button" class="ghost-btn" data-refresh-schema>刷新表结构</button>
+      <button type="button" class="ghost-btn" data-new-conversation>新会话</button>
+      <button type="button" class="ghost-btn" data-toggle-logs>审计日志</button>
+    </div>
+
+    <div class="page-head">
+      <h2>用中文问数据，AI 替你写 SQL</h2>
+      <p>
+        例如「各品类商品的数量和平均价格是多少？」「价格最高的 5 个商品」。
+        生成的 SQL 会先过只读守卫（拒绝写操作 / 多语句 / 敏感列），再在只读事务里执行，最后给出中文结论。
+      </p>
+    </div>
+
+    <main class="layout">
+      <section class="card ask-card">
+        <header class="card-head">
+          <h3>💬 提问</h3>
+          <span class="card-hint">POST /api/v1/bi/chat</span>
+        </header>
+
+        <form class="ask-form" id="askForm">
+          <textarea
+            id="questionInput"
+            rows="2"
+            placeholder="例如：各品类商品的数量和平均价格是多少？（Enter 发送，Shift+Enter 换行）"
+            aria-label="输入数据问题"
+          ></textarea>
+          <div class="ask-actions">
+            <label class="field inline-field">
+              user_id
+              <input type="number" id="userIdInput" min="0" step="1" value="0" inputmode="numeric" />
+            </label>
+            <button type="submit" class="primary-btn" id="askButton">问数</button>
+          </div>
+        </form>
+
+        <div class="suggestions" id="suggestions">
+          <button type="button" data-suggest="一共有多少个商品？">一共有多少个商品？</button>
+          <button type="button" data-suggest="各品类商品的数量和平均价格是多少？">各品类数量与均价</button>
+          <button type="button" data-suggest="价格最高的 5 个商品是哪些？">价格最高的 5 个商品</button>
+          <button type="button" data-suggest="运动鞋品类里最贵的商品是什么？">运动鞋里最贵的</button>
+        </div>
+
+        <div class="answer-box" id="answerBox" hidden>
+          <div class="answer-text" id="answerText"></div>
+        </div>
+        <div class="error-box" id="errorBox" hidden></div>
+      </section>
+
+      <section class="card">
+        <header class="card-head">
+          <h3>🧾 生成的 SQL</h3>
+          <span class="card-hint">只读 · 自动夹逼 LIMIT</span>
+        </header>
+        <pre class="sql-box" id="sqlBox">还没有执行过问数。</pre>
+      </section>
+
+      <section class="card">
+        <header class="card-head">
+          <h3>📋 查询结果</h3>
+          <span class="card-hint" id="rowHint">—</span>
+        </header>
+        <div class="table-wrap" id="tableBox">
+          <div class="empty-state">问一次数据，结果会显示在这里。</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header class="card-head">
+          <h3>📈 图表</h3>
+          <span class="card-hint">结果含类目 + 数值列时自动生成</span>
+        </header>
+        <div class="chart-box" id="chartBox">
+          <div class="empty-state">暂无图表。</div>
+        </div>
+      </section>
+
+      <section class="card logs-card" id="logsCard" hidden>
+        <header class="card-head">
+          <h3>🗂️ 审计日志</h3>
+          <span class="card-hint">GET /api/v1/bi/logs</span>
+        </header>
+        <div class="stats" id="logStats"></div>
+        <div class="chart-box" id="dailyChart"></div>
+        <div class="table-wrap" id="logTable"></div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="./app.js?v=1" defer></script>
+  </body>
+</html>

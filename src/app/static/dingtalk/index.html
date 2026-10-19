@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>信息查询 · 钉协助手智能体</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📇</text></svg>"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./chat.css" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">📇</span>
+        <div class="brand-text">
+          <h1>钉协助手智能体</h1>
+          <p>钉钉 DWS 直连 · 查询与办理</p>
+        </div>
+      </div>
+
+      <nav class="menu" aria-label="页面切换">
+        <a href="./index.html" data-page="query">🔍 信息查询</a>
+        <a href="./operations.html" data-page="operations">🚀 快捷办理</a>
+        <a href="/agents/">🧠 多智能体</a>
+        <a href="/bi/">📊 智能问数</a>
+      </nav>
+    </header>
+
+    <div class="status-bar">
+      <span class="chip" data-chip="dws">
+        <span>dws CLI</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="chip" data-chip="auth">
+        <span>钉钉账号</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="spacer"></span>
+      <button type="button" class="ghost-btn" data-refresh-status>刷新状态</button>
+    </div>
+
+    <div class="page-head">
+      <h2>信息查询</h2>
+      <p>
+        只读查询：登录状态、通讯录、今日日程、我的待办、收到的日志、今日考勤与群聊搜索。结果均为 dws CLI
+        原始输出，可一键复制；页面底部还可以直接用自然语言指挥钉协助手。
+      </p>
+    </div>
+
+    <main class="layout">
+      <form class="card" id="authCard" data-action="post" data-path="/auth/login">
+        <header class="card-head">
+          <h3>🔐 账号登录</h3>
+          <span class="card-hint">POST /auth/login</span>
+        </header>
+        <p class="card-desc">
+          首次使用或登录过期时，点击按钮触发本机浏览器扫码授权；授权完成后顶部的「钉钉账号」徽标会自动变为已登录。
+        </p>
+        <div class="actions">
+          <button type="submit" class="primary-btn">触发扫码登录</button>
+          <span class="card-hint">登录状态查看 GET /auth/status</span>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="get" data-path="/contact/search">
+        <header class="card-head">
+          <h3>🔍 通讯录搜索</h3>
+          <span class="card-hint">GET /contact/search</span>
+        </header>
+        <p class="card-desc">按姓名或花名找人，返回 userId、部门、职位；发消息、指派待办前可先在这里取 userId。</p>
+        <div class="fields">
+          <label class="field wide">
+            查询关键词
+            <input type="search" name="query" placeholder="例如：张三" required />
+          </label>
+        </div>
+        <div class="actions">
+          <button type="submit" class="primary-btn">搜索联系人</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="get" data-path="/group/search">
+        <header class="card-head">
+          <h3>👥 群聊搜索</h3>
+          <span class="card-hint">GET /group/search</span>
+        </header>
+        <p class="card-desc">
+          按群名关键词搜索，返回群名称与 openConversationId；发布群公告时需要先在「快捷办理」页填入该 ID。
+        </p>
+        <div class="fields">
+          <label class="field wide">
+            群名关键词
+            <input type="search" name="query" placeholder="例如：项目冲刺" required />
+          </label>
+        </div>
+        <div class="actions">
+          <button type="submit" class="primary-btn">搜索群聊</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="get" data-path="/calendar/list">
+        <header class="card-head">
+          <h3>📅 今日日程</h3>
+          <span class="card-hint">GET /calendar/list</span>
+        </header>
+        <p class="card-desc">查询今天的钉钉日程安排，无需任何参数。</p>
+        <div class="actions">
+          <button type="submit" class="primary-btn">查询今日日程</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="get" data-path="/todo/list">
+        <header class="card-head">
+          <h3>✅ 我的待办</h3>
+          <span class="card-hint">GET /todo/list</span>
+        </header>
+        <p class="card-desc">查询自己的钉钉待办，可按优先级过滤。</p>
+        <div class="fields">
+          <label class="field">
+            优先级（可选）
+            <input type="text" name="priority" placeholder="40,30" />
+          </label>
+          <label class="switch"><input type="checkbox" name="include_done" /> 包含已完成</label>
+        </div>
+        <div class="actions">
+          <button type="submit" class="primary-btn">查询待办</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="get" data-path="/log/list">
+        <header class="card-head">
+          <h3>📝 收到的日志</h3>
+          <span class="card-hint">GET /log/list</span>
+        </header>
+        <p class="card-desc">查询我收到的钉钉日志（日报 / 周报）。</p>
+        <div class="actions">
+          <button type="submit" class="primary-btn">查询收到的日志</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="get" data-path="/attendance">
+        <header class="card-head">
+          <h3>🕒 今日考勤</h3>
+          <span class="card-hint">GET /attendance</span>
+        </header>
+        <p class="card-desc">查询我今天的钉钉考勤打卡流水。</p>
+        <div class="actions">
+          <button type="submit" class="primary-btn">查询今日打卡</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <section class="card full chat-card" id="chatCard">
+        <header class="card-head">
+          <h3>💬 和钉协助手对话</h3>
+          <span class="chat-status" id="chatStatus">在线</span>
+        </header>
+        <p class="card-desc">
+          用一句话描述需求，智能体会自动挑选合适的钉钉工具执行；流式接口为 POST /chat（SSE）。
+          对话里涉及写操作时只会<strong>预演</strong>（不会真的发出去）：真实执行请到「快捷办理」提交，或在「多智能体」控制台里点「确认执行」。
+        </p>
+
+        <div class="chat-log" id="chatLog" aria-live="polite"></div>
+
+        <div class="chat-suggestions" id="chatSuggestions">
+          <button type="button">今天有哪些日程？</button>
+          <button type="button">我有哪些未完成的待办？</button>
+          <button type="button">搜索一下「张三」的联系方式</button>
+          <button type="button">我今天打卡了吗？</button>
+        </div>
+
+        <form class="chat-form" id="chatForm">
+          <textarea
+            id="chatInput"
+            rows="1"
+            placeholder="例如：看看今天有什么会，然后提醒我 18:00 交周报"
+            aria-label="向钉协助手提问"
+          ></textarea>
+          <button type="submit" id="chatSend">发送</button>
+        </form>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="./common.js" defer></script>
+    <script src="./query.js" defer></script>
+  </body>
+</html>

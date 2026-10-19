@@ -1,0 +1,711 @@
+/* 旅游建议智能体页面样式：深色玻璃质感 + 天气主题渐变。 */
+
+:root {
+  --bg: #070b18;
+  --card: rgba(255, 255, 255, 0.055);
+  --card-strong: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #e9eefc;
+  --muted: #93a4c6;
+  --accent: #4f9cf9;
+  --accent-2: #7c6cff;
+  --warn: #ffb454;
+  --danger: #ff7585;
+  --ok: #46d19b;
+  --radius: 18px;
+  --shadow: 0 18px 40px rgba(3, 7, 20, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 背景极光：两团缓慢移动的径向渐变，仅作氛围装饰 */
+.aurora {
+  position: fixed;
+  inset: -30% -10% auto -10%;
+  height: 120vh;
+  background:
+    radial-gradient(closest-side, rgba(79, 156, 249, 0.35), transparent 70%) 12% 18% / 55% 55% no-repeat,
+    radial-gradient(closest-side, rgba(124, 108, 255, 0.32), transparent 70%) 78% 8% / 60% 60% no-repeat,
+    radial-gradient(closest-side, rgba(70, 209, 155, 0.18), transparent 70%) 45% 45% / 70% 70% no-repeat;
+  filter: blur(10px);
+  animation: drift 26s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.08);
+  }
+}
+
+/* ---------------- 顶部栏 ---------------- */
+
+.topbar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 26px 20px 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(140deg, rgba(79, 156, 249, 0.35), rgba(124, 108, 255, 0.35));
+  border: 1px solid var(--border);
+  font-size: 24px;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.brand-text p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 320px;
+  min-width: 260px;
+  padding: 6px 6px 6px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  backdrop-filter: blur(14px);
+}
+
+.search:focus-within {
+  border-color: rgba(79, 156, 249, 0.7);
+  box-shadow: 0 0 0 3px rgba(79, 156, 249, 0.18);
+}
+
+.search-icon {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 0;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+.search input::placeholder {
+  color: rgba(147, 164, 198, 0.75);
+}
+
+.search button {
+  padding: 9px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.search button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.search button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.quick-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.quick-cities button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-cities button:hover {
+  color: var(--text);
+  border-color: rgba(79, 156, 249, 0.6);
+  background: rgba(79, 156, 249, 0.14);
+}
+
+/* ---------------- 布局 ---------------- */
+
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+  gap: 18px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 20px 36px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.card {
+  padding: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.card-hint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.empty-state {
+  padding: 22px 4px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.retry-btn {
+  margin-top: 10px;
+  padding: 5px 18px;
+  border: 1px solid rgba(79, 156, 249, 0.6);
+  border-radius: 999px;
+  background: rgba(79, 156, 249, 0.14);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.retry-btn:hover {
+  background: rgba(79, 156, 249, 0.28);
+}
+
+/* ---------------- 实时天气 ---------------- */
+
+.current-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.current-emoji {
+  font-size: 58px;
+  line-height: 1;
+  filter: drop-shadow(0 6px 16px rgba(79, 156, 249, 0.35));
+}
+
+.current-temp {
+  font-size: 54px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.05;
+}
+
+.current-temp small {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.current-desc {
+  min-width: 160px;
+}
+
+.current-desc .city-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.current-desc .city-meta,
+.current-desc .condition {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.metric {
+  padding: 10px 12px;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.metric .label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.metric .value {
+  display: block;
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---------------- 富文本（建议 / 回答） ---------------- */
+
+.richtext {
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.richtext p {
+  margin: 0 0 8px;
+}
+
+.richtext p:last-child {
+  margin-bottom: 0;
+}
+
+.richtext ul,
+.richtext ol {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+
+.richtext li {
+  margin-bottom: 4px;
+}
+
+.richtext strong {
+  color: #fff;
+}
+
+.richtext code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+}
+
+/* ---------------- 逐日预报 ---------------- */
+
+.forecast-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+}
+
+.forecast-track::-webkit-scrollbar {
+  height: 8px;
+}
+
+.forecast-track::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.day-card {
+  flex: 0 0 132px;
+  padding: 14px 12px;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.day-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(79, 156, 249, 0.65);
+}
+
+.day-card .day-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.day-card .day-date {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.day-card .day-emoji {
+  margin: 6px 0 2px;
+  font-size: 26px;
+}
+
+.day-card .day-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.day-card .day-temp {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.day-card .day-extra {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* ---------------- 对话面板 ---------------- */
+
+.chat-card {
+  position: sticky;
+  top: 18px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  max-height: 860px;
+}
+
+.chat-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ok);
+  font-size: 12px;
+}
+
+.chat-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.chat-status.busy {
+  color: var(--warn);
+}
+
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-log::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.msg {
+  max-width: 92%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  animation: rise 0.22s ease;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, rgba(79, 156, 249, 0.9), rgba(124, 108, 255, 0.9));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg.assistant {
+  align-self: flex-start;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.error {
+  border-color: rgba(255, 117, 133, 0.5);
+  color: var(--danger);
+}
+
+.msg .city-tag {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 11px;
+}
+
+.tool-trace {
+  margin-bottom: 6px;
+  color: var(--warn);
+  font-size: 12px;
+}
+
+.typing::after {
+  content: "▋";
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 10px;
+}
+
+.chat-suggestions button {
+  padding: 5px 11px;
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chat-suggestions button:hover {
+  color: var(--text);
+  border-style: solid;
+  border-color: rgba(79, 156, 249, 0.6);
+}
+
+.chat-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.chat-form:focus-within {
+  border-color: rgba(79, 156, 249, 0.7);
+}
+
+.chat-form textarea {
+  flex: 1;
+  max-height: 120px;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+}
+
+.chat-form textarea::placeholder {
+  color: rgba(147, 164, 198, 0.7);
+}
+
+.chat-form button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-form button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+/* ---------------- 其他 ---------------- */
+
+.skeleton {
+  height: 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 9;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(20, 26, 44, 0.95);
+  border: 1px solid rgba(255, 117, 133, 0.5);
+  color: var(--danger);
+  font-size: 13px;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chat-card {
+    position: static;
+    height: 560px;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 18px 14px 12px;
+  }
+
+  .layout {
+    padding: 0 14px 26px;
+  }
+
+  .current-temp {
+    font-size: 44px;
+  }
+
+  .current-emoji {
+    font-size: 44px;
+  }
+}
+
+/* ---------------- 顶部导航（与另外三个前端保持一致） ---------------- */
+
+.menu {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 20px 14px;
+}
+
+.menu a {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.menu a.active,
+.menu a:hover {
+  color: var(--text);
+  border-color: rgba(79, 156, 249, 0.6);
+  background: rgba(79, 156, 249, 0.16);
+}

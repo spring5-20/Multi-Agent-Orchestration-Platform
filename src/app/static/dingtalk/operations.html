@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>快捷办理 · 钉协助手智能体</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">🚀</span>
+        <div class="brand-text">
+          <h1>钉协助手智能体</h1>
+          <p>钉钉 DWS 直连 · 查询与办理</p>
+        </div>
+      </div>
+
+      <nav class="menu" aria-label="页面切换">
+        <a href="./index.html" data-page="query">🔍 信息查询</a>
+        <a href="./operations.html" data-page="operations">🚀 快捷办理</a>
+        <a href="/agents/">🧠 多智能体</a>
+        <a href="/bi/">📊 智能问数</a>
+      </nav>
+    </header>
+
+    <div class="status-bar">
+      <span class="chip" data-chip="dws">
+        <span>dws CLI</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="chip" data-chip="auth">
+        <span>钉钉账号</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="spacer"></span>
+      <button type="button" class="ghost-btn" data-refresh-status>刷新状态</button>
+    </div>
+
+    <div class="notice">
+      ⚠️ 本页全部是写操作，会真实影响钉钉侧数据。未勾选「已确认执行」时后端会追加 <code>--dry-run</code> 只做预演，不会产生任何改动；勾选后才追加 <code>--yes</code> 真实执行。
+      写操作还需要后端开启 <code>DINGTALK_ENABLE_WRITE=true</code>。
+    </div>
+
+    <div class="page-head">
+      <h2>快捷办理</h2>
+      <p>日程、待办、消息、DING、在线表格、日报日志、群公告与机器人推送，一个表单对应一条接口。</p>
+    </div>
+
+    <main class="layout">
+      <form class="card" data-action="post" data-path="/calendar">
+        <header class="card-head">
+          <h3>📅 创建日程</h3>
+          <span class="card-hint">POST /calendar</span>
+        </header>
+        <p class="card-desc">在钉钉日历中创建日程/会议，可按姓名邀请参会人。时间需为 ISO8601 格式。</p>
+        <div class="fields">
+          <label class="field wide">
+            日程标题
+            <input type="text" name="title" placeholder="例如：xxx 项目评审会" required />
+          </label>
+          <label class="field">
+            开始时间
+            <input type="text" name="start" placeholder="2026-09-23T14:00:00+08:00" required />
+          </label>
+          <label class="field">
+            结束时间
+            <input type="text" name="end" placeholder="2026-09-23T15:00:00+08:00" required />
+          </label>
+          <label class="field wide">
+            参会人（可选）
+            <input type="text" name="attendees" placeholder="张三,李四" />
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">创建日程</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/todo">
+        <header class="card-head">
+          <h3>✅ 给自己建待办</h3>
+          <span class="card-hint">POST /todo</span>
+        </header>
+        <p class="card-desc">创建一条属于自己的钉钉待办，可设置截止时间。</p>
+        <div class="fields">
+          <label class="field wide">
+            待办内容
+            <input type="text" name="task" placeholder="例如：交周报" required />
+          </label>
+          <label class="field wide">
+            截止时间（可选）
+            <input type="text" name="at" placeholder="2026-09-25T18:00:00+08:00" />
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">创建待办</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/todo/assign">
+        <header class="card-head">
+          <h3>🙋 指派待办给同事</h3>
+          <span class="card-hint">POST /todo/assign</span>
+        </header>
+        <p class="card-desc">给某位同事创建并指派一条待办，执行人可填姓名或花名。</p>
+        <div class="fields">
+          <label class="field wide">
+            待办内容
+            <input type="text" name="task" placeholder="例如：整理接口文档" required />
+          </label>
+          <label class="field">
+            执行人
+            <input type="text" name="to" placeholder="例如：李四" required />
+          </label>
+          <label class="field">
+            截止时间（可选）
+            <input type="text" name="due" placeholder="2026-09-26T18:00:00+08:00" />
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">指派待办</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/message/send" data-danger="1">
+        <header class="card-head">
+          <h3>💬 发单聊消息</h3>
+          <span class="card-hint">POST /message/send</span>
+        </header>
+        <p class="card-desc">给某位同事发钉钉单聊消息，内容支持 Markdown。</p>
+        <div class="fields">
+          <label class="field wide">
+            收件人
+            <input type="text" name="to" placeholder="例如：张三（姓名或花名）" required />
+          </label>
+          <label class="field wide">
+            消息内容
+            <textarea name="content" placeholder="例如：今天的评审会改到 15:00。" required></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">发送单聊</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/group-message/send" data-danger="1">
+        <header class="card-head">
+          <h3>📢 发群消息</h3>
+          <span class="card-hint">POST /group-message/send</span>
+        </header>
+        <p class="card-desc">给指定钉钉群发消息，群名不唯一时建议先用「信息查询」页的群搜索确认群名。</p>
+        <div class="fields">
+          <label class="field wide">
+            群名称
+            <input type="text" name="group" placeholder="例如：项目冲刺" required />
+          </label>
+          <label class="field wide">
+            消息内容
+            <textarea name="content" placeholder="例如：今天的构建已完成，可以开始验收。" required></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">发送群消息</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/ding/send" data-danger="1">
+        <header class="card-head">
+          <h3>🔔 发送 DING 强提醒</h3>
+          <span class="card-hint">POST /ding/send</span>
+        </header>
+        <p class="card-desc">
+          打扰性较强，请谨慎使用。接收人需要 openDingTalkId（可用「信息查询」页的通讯录搜索解析）。
+        </p>
+        <div class="fields">
+          <label class="field wide">
+            接收人 ID
+            <input type="text" name="users" placeholder="openDingTalkId，多个用逗号分隔" required />
+          </label>
+          <label class="field">
+            提醒方式
+            <select name="method">
+              <option value="app">app（应用内）</option>
+              <option value="sms">sms（短信）</option>
+              <option value="call">call（电话）</option>
+            </select>
+          </label>
+          <label class="field wide">
+            提醒内容
+            <textarea name="content" placeholder="例如：紧急：请立即确认线上告警。" required></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">发送 DING</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/sheet">
+        <header class="card-head">
+          <h3>📊 创建在线表格</h3>
+          <span class="card-hint">POST /sheet</span>
+        </header>
+        <p class="card-desc">新建一篇钉钉在线电子表格；文件夹 ID / 知识库 ID 可选，不填则使用默认位置。</p>
+        <div class="fields">
+          <label class="field wide">
+            表格名称
+            <input type="text" name="name" placeholder="例如：Q1 数据" required />
+          </label>
+          <label class="field">
+            文件夹 ID（可选）
+            <input type="text" name="folder" placeholder="folder id" />
+          </label>
+          <label class="field">
+            知识库 ID（可选）
+            <input type="text" name="workspace" placeholder="workspace id" />
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">创建表格</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/log">
+        <header class="card-head">
+          <h3>📝 提交日报日志</h3>
+          <span class="card-hint">POST /log</span>
+        </header>
+        <p class="card-desc">
+          按日志模板提交；contents 是需要提交的 JSON 数组字符串，每项包含 key / sort / content / contentType /
+          type。模板 ID 可在钉钉日志模板页获取。
+        </p>
+        <div class="fields">
+          <label class="field">
+            模板 ID
+            <input type="text" name="template_id" placeholder="template-id" required />
+          </label>
+          <label class="field">
+            接收人 userId
+            <input type="text" name="to_user_ids" placeholder="userId，多个用逗号分隔" required />
+          </label>
+          <label class="field wide">
+            日志内容（JSON 数组）
+            <textarea
+              class="mono"
+              name="contents"
+              placeholder='[{"key":"content","sort":"0","content":"今日完成：...","contentType":"markdown","type":"1"}]'
+              required
+            ></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">提交日志</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/notice" data-danger="1">
+        <header class="card-head">
+          <h3>📌 发布群公告</h3>
+          <span class="card-hint">POST /notice</span>
+        </header>
+        <p class="card-desc">
+          在指定群发布公告，正文为 Markdown。conversation_id 是群的 openConversationId，可在「信息查询」页用群搜索获取。
+        </p>
+        <div class="fields">
+          <label class="field wide">
+            群 openConversationId
+            <input type="text" name="conversation_id" placeholder="cidFQ3a+0mk0am0xbTzkRx2Vg==" required />
+          </label>
+          <label class="field wide">
+            公告正文（Markdown）
+            <textarea
+              name="content"
+              placeholder="# 版本发布&#10;- 时间：今晚 22:00&#10;- 影响：服务短暂不可用"
+              required
+            ></textarea>
+          </label>
+          <label class="switch"><input type="checkbox" name="sticky" /> 设为置顶</label>
+          <label class="switch"><input type="checkbox" name="send_ding" /> 同时发 DING 提醒</label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">发布公告</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+
+      <form class="card" data-action="post" data-path="/robot-message/send" data-danger="1">
+        <header class="card-head">
+          <h3>🤖 机器人推送</h3>
+          <span class="card-hint">POST /robot-message/send</span>
+        </header>
+        <p class="card-desc">
+          通过群自定义机器人 Webhook 推送到机器人所在群；Webhook token 由后端 DINGTALK_ROBOT_WEBHOOK_TOKEN
+          配置，内容需包含机器人安全设置的关键词。
+        </p>
+        <div class="fields">
+          <label class="field wide">
+            推送内容
+            <textarea name="content" placeholder="例如：构建通知：main 分支流水线已通过。" required></textarea>
+          </label>
+        </div>
+        <div class="actions">
+          <label class="switch confirm"><input type="checkbox" name="confirm" /> 已确认执行</label>
+          <span class="flex-spacer"></span>
+          <button type="submit" class="primary-btn">推送消息</button>
+        </div>
+        <div class="result" data-result hidden></div>
+      </form>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="./common.js" defer></script>
+    <script src="./operations.js" defer></script>
+  </body>
+</html>

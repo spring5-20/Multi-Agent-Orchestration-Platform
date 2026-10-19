@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>电商导购智能体 · 实时语音对话</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>"
+    />
+    <link rel="stylesheet" href="./styles.css?v=2" />
+    <link rel="stylesheet" href="./voice.css?v=1" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">🎙️</span>
+        <div class="brand-text">
+          <h1>电商导购智能体 · 实时语音对话</h1>
+          <p>Qwen3-ASR 实时识别 · LangGraph 导购回答 · CosyVoice 逐句合成</p>
+        </div>
+      </div>
+
+      <nav class="menu" aria-label="页面切换">
+        <a href="/ui/">🌤️ 旅游建议</a>
+        <a href="/dingtalk/">📇 钉协助手</a>
+        <a href="./index.html">🛒 电商导购</a>
+        <a href="./voice.html" class="active" aria-current="page">🎙️ 语音对话</a>
+        <a href="/agents/">🧠 多智能体</a>
+        <a href="/bi/">📊 智能问数</a>
+      </nav>
+    </header>
+
+    <div class="status-bar">
+      <span class="chip" data-chip="api">
+        <span>后端接口</span>
+        <span class="chip-value" data-value>检测中…</span>
+      </span>
+      <span class="chip" data-chip="auth">
+        <span>登录状态</span>
+        <span class="chip-value" data-value>未登录</span>
+      </span>
+      <span class="chip" data-chip="ws">
+        <span>语音连接</span>
+        <span class="chip-value" data-value>未连接</span>
+      </span>
+      <span class="chip" data-chip="asr">
+        <span>识别会话</span>
+        <span class="chip-value" data-value>未就绪</span>
+      </span>
+      <span class="spacer"></span>
+      <button type="button" class="ghost-btn" data-connect>连接语音</button>
+      <button type="button" class="ghost-btn" data-disconnect>断开连接</button>
+    </div>
+
+    <div class="page-head">
+      <h2>边说边答的语音导购</h2>
+      <p>
+        麦克风采集 16kHz 单声道 PCM 实时送往 Qwen3-ASR；说完一句后后端立刻走 LangGraph 导购流程，再逐句合成语音回推播放。默认「按住说话」；切到「连续对话」后由前端按静音自动断句，可以一直说下去。
+      </p>
+    </div>
+
+    <main class="layout">
+      <div class="voice-column">
+        <section class="card login-card">
+          <header class="card-head">
+            <h3>🔐 登录 / 注册</h3>
+            <span class="card-hint">POST /api/v1/auth/login</span>
+          </header>
+          <p class="card-desc">
+            语音链路同样需要 Bearer 令牌：页面会把它放进 WebSocket 地址的 token 参数（浏览器无法为 WebSocket 设置请求头）。账号不存在时会自动注册，令牌与「电商导购」测试台共用。
+          </p>
+          <form id="loginForm" class="fields" autocomplete="off">
+            <label class="field">
+              用户名
+              <input type="text" id="username" name="username" value="tester" minlength="3" maxlength="100" required />
+            </label>
+            <label class="field">
+              密码
+              <input type="password" id="password" name="password" value="test123456" minlength="6" maxlength="128" required />
+            </label>
+            <div class="actions">
+              <button type="submit" class="primary-btn" data-login>登录 / 注册并登录</button>
+              <button type="button" class="ghost-btn" data-logout>退出登录</button>
+            </div>
+            <div class="login-result" id="loginResult" hidden></div>
+          </form>
+        </section>
+
+        <section class="card voice-card">
+          <header class="card-head">
+            <h3>🎙️ 麦克风</h3>
+            <span class="card-hint" id="wsHint">WS /api/v1/ecommerce/voice/realtime</span>
+          </header>
+
+          <div class="mic-stage">
+            <button type="button" class="mic-btn" id="micBtn" disabled aria-label="语音输入">
+              <span>🎤</span>
+              <span class="mic-label" id="micLabel">未就绪</span>
+            </button>
+            <div class="mic-meta">
+              <div class="meter" aria-hidden="true"><span id="levelBar"></span></div>
+              <p id="micState">登录后点右上角「连接语音」建立会话，就绪后即可说话。</p>
+              <p id="turnState">当前轮次：空闲</p>
+            </div>
+          </div>
+
+          <div class="mode-row">
+            <label><input type="radio" name="turnMode" value="hold" checked /> 按住说话</label>
+            <label><input type="radio" name="turnMode" value="auto" /> 连续对话（静音自动断句）</label>
+            <label>灵敏度 <input type="range" id="sensitivity" min="1" max="10" value="4" /></label>
+          </div>
+
+          <div class="voice-tip">
+            <b>提示：</b>麦克风需要安全上下文，请用 <code>http://127.0.0.1:8000/ecommerce/voice.html</code> 或 HTTPS 打开；首次使用浏览器会询问麦克风权限。
+          </div>
+        </section>
+      </div>
+
+      <section class="card chat-card">
+        <header class="card-head">
+          <h3>💬 对话记录</h3>
+          <span class="card-hint" id="chatHint">识别文本 + 语音回复</span>
+        </header>
+
+        <div class="chat-log" id="chatLog" aria-live="polite">
+          <div class="empty-state">连接语音后按住麦克风说话，例如「预算 500 以内想买双跑步鞋，帮我推荐几款」。</div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="./voice.js?v=1" defer></script>
+  </body>
+</html>

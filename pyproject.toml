@@ -1,0 +1,123 @@
+[project]
+name = "multi-agent-orchestration-platform"
+version = "0.1.0"
+description = "基于 FastAPI、LangGraph、MCP 与 A2A 的多智能体协作平台。"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "杨磊", email = "3407047940@qq.com" },
+]
+keywords = ["fastapi", "langgraph", "multi-agent", "mcp", "a2a", "rag"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+]
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "gunicorn>=22.0.0",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+    "redis[hiredis]>=5.0.0",
+    "arq>=0.25.0",
+    "uvloop>=0.19.0; sys_platform != 'win32'",
+    "fastcrud>=0.12.1",
+    "pyjwt>=2.8.0",
+    "python-multipart>=0.0.9",
+    "email-validator>=2.1.0",
+    "anyio>=4.0.0",
+    "psycopg2-binary>=2.9.9",
+    "pgvector>=0.5.0",
+    # LangChain / LangGraph 生态（RAG 编排、文档加载与 Agent 工作流）
+    "langchain>=1.0.0",
+    "langchain-core>=1.0.0",
+    "langchain-community>=0.4.0",
+    "langchain-openai>=1.0.0",
+    "langchain-text-splitters>=1.0.0",
+    "langgraph>=1.0.0",
+    "dashscope>=1.27.4",
+    "pymilvus>=3.0.1",
+    "fastmcp>=4.0.5",
+    "psycopg[binary]>=3.3.6",
+    # task_mcp 使用 psycopg3 的连接池
+    "psycopg-pool>=3.2.0",
+    "a2a-sdk[fastapi,sqlite]>=1.2.2",
+    "langgraph-checkpoint-postgres>=3.1.2",
+    # datasets/langchain-community 的传递依赖链会引入 pyarrow 26，运行时硬性要求 NumPy 2.x，
+    # 因此 numpy 必须放主依赖（RAG 评估模块也会用到）。
+    "numpy>=2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-mock>=3.12.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+    "faker>=24.0.0",
+    "ruff>=0.5.0",
+    "mypy>=1.10.0",
+    "pre-commit>=3.5.0",
+]
+# RAG 评估（RAGAS）为可选依赖组：uv sync --group eval 才会安装，
+# 主服务 uv sync 不带 --group eval 也能正常启动。
+eval = [
+    "ragas>=0.4.3,<0.5",
+    "datasets>=3.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.hatch.build.targets.wheel.sources]
+"app" = "src/app"
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "ASYNC"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastMCP / FastAPI 的依赖注入约定就是在默认参数里调用 Depends，B008 属误报
+"src/mcp_serves/**" = ["B008"]
+# FastAPI 的依赖注入同样要求在默认参数里调用 Depends，B008 属误报
+"src/app/core/deps.py" = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# 需要同时支持 src.app.*（应用）与 src.mcp_serves.*（MCP 服务）两种导入，故加入仓库根与 src
+pythonpath = [".", "src"]
+python_files = ["test_*.py"]
+filterwarnings = [
+    # FastAPI/Starlette 的 TestClient 在上游迁移到 httpx2 之前会触发该警告，属可忽略的第三方弃用提示。
+    "ignore::DeprecationWarning:starlette",
+    "ignore::DeprecationWarning:fastapi",
+    # dashscope 在导入时提示其 Assistants API 弃用，与本项目用法无关
+    "ignore::DeprecationWarning:dashscope",
+]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "src.app.*"
+disallow_untyped_defs = true
